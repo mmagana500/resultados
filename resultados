@@ -208,7 +208,7 @@
   <!-- SCRIPT CONECTIVIDAD & RENDERIZADO -->
   <script>
     // URL del Apps Script publicado (Reemplazar con tu enlace real de Apps Script)
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM_gijr6HShfnBQCqIm0zNsZ8wYrmjPfgvnEvN07TxeqwLPN266U_2wir4nZjx_PwwZg/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxr0gr63PHk9l_wVjh6_4eXVrg40edjZFV6hpRwxzDaMRsXXkYNH9FRY31ZbsYYR9k/exec";
 
     let barChartInstance = null;
     let radarChartInstance = null;
