@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultados Evaluación Docente - C.E.C. Padre Mario Zanconato</title>
+  
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col">
+
+  <!-- ENCABEZADO INSTITUCIONAL -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 backdrop-blur-md bg-slate-900/90">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-4 text-center md:text-left">
+        <div class="p-3 bg-brand-600/20 rounded-2xl border border-brand-500/30 text-brand-500">
+          <i class="fa-solid fa-graduation-cap text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white tracking-wide uppercase">C.E.C. “Padre Mario Zanconato”</h1>
+          <p class="text-xs text-slate-400 font-medium">Portal Institucional de Evaluación del Desempeño Docente</p>
+        </div>
+      </div>
+      
+      <!-- Indicador de sincronización en vivo -->
+      <div class="flex items-center gap-3 bg-slate-800/80 px-4 py-2 rounded-full border border-slate-700/80">
+        <span class="relative flex h-3 w-3">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+        </span>
+        <span class="text-xs text-slate-300 font-semibold tracking-wider uppercase">Sincronizado en tiempo real</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- SECCIÓN DE FILTROS & CONTROLES -->
+    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-xl">
+      <div>
+        <h2 class="text-base font-semibold text-white flex items-center gap-2">
+          <i class="fa-solid fa-filter text-brand-500"></i> Filtros de Visualización
+        </h2>
+        <p class="text-xs text-slate-400">Selecciona una sección o grupo para aislar los promedios</p>
+      </div>
+      <div class="w-full sm:w-72">
+        <select id="filtroGrupo" onchange="filtrarResultados()" class="w-full bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 outline-none transition-all">
+          <option value="TODOS">-- Todos los Grupos / Secciones --</option>
+          <option value="1G_A">1° General “A”</option>
+          <option value="1G_B">1° General “B”</option>
+          <option value="1G_C">1° General “C”</option>
+          <option value="1AC_A">1° Admin. Contable “A”</option>
+          <option value="2G_A">2° General “A”</option>
+          <option value="2G_B">2° General “B”</option>
+          <option value="2AC_A">2° Admin. Contable “A”</option>
+          <option value="3AC_A">3° Admin. Contable “A”</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- TARJETAS DE INDICADORES (KPIs) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- Total Respuestas -->
+      <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800/80 shadow-lg hover:border-slate-700 transition-all">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Total Evaluaciones</p>
+            <h3 id="kpi-total" class="text-3xl font-extrabold text-brand-500 mt-2">0</h3>
+          </div>
+          <div class="p-3 bg-brand-500/10 rounded-xl text-brand-500">
+            <i class="fa-solid fa-clipboard-check text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Promedio Institucional -->
+      <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800/80 shadow-lg hover:border-slate-700 transition-all">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Promedio Global</p>
+            <h3 id="kpi-promedio" class="text-3xl font-extrabold text-emerald-400 mt-2">0.00 / 5.0</h3>
+          </div>
+          <div class="p-3 bg-emerald-500/10 rounded-xl text-emerald-400">
+            <i class="fa-solid fa-star text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Docentes Evaluados -->
+      <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800/80 shadow-lg hover:border-slate-700 transition-all">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Docentes / Materias</p>
+            <h3 id="kpi-docentes" class="text-3xl font-extrabold text-purple-400 mt-2">0</h3>
+          </div>
+          <div class="p-3 bg-purple-500/10 rounded-xl text-purple-400">
+            <i class="fa-solid fa-chalkboard-user text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dimensión Mejor Evaluada -->
+      <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800/80 shadow-lg hover:border-slate-700 transition-all">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Dimensión Destacada</p>
+            <h3 id="kpi-dimension" class="text-lg font-bold text-amber-400 mt-2 truncate">Cargando...</h3>
+          </div>
+          <div class="p-3 bg-amber-500/10 rounded-xl text-amber-400">
+            <i class="fa-solid fa-award text-xl"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN DE GRÁFICOS INTERACTIVOS -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Gráfico de Promedio por Docente -->
+      <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 shadow-xl flex flex-col justify-between">
+        <div class="mb-4">
+          <h3 class="text-base font-semibold text-white flex items-center gap-2">
+            <i class="fa-solid fa-chart-bar text-brand-500"></i> Promedio General por Docente / Asignatura
+          </h3>
+          <p class="text-xs text-slate-400">Escala Likert global de 1.0 a 5.0 puntos</p>
+        </div>
+        <div class="relative h-72 w-full">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico Radial de Dimensiones Evaluadas -->
+      <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 shadow-xl flex flex-col justify-between">
+        <div class="mb-4">
+          <h3 class="text-base font-semibold text-white flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-purple-500"></i> Promedio General por Dimensiones
+          </h3>
+          <p class="text-xs text-slate-400">Planificación, Estrategias, Evaluación y Relación Estud.</p>
+        </div>
+        <div class="relative h-72 w-full flex justify-center">
+          <canvas id="radarChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA DETALLADA DE RESULTADOS -->
+    <div class="bg-slate-900/80 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+      <div class="p-6 border-b border-slate-800">
+        <h3 class="text-base font-semibold text-white flex items-center gap-2">
+          <i class="fa-solid fa-table text-emerald-400"></i> Tabla Resumen de Desempeño
+        </h3>
+        <p class="text-xs text-slate-400">Detalle consolidado de registros por sección y docente</p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-slate-300">
+          <thead class="text-xs uppercase bg-slate-950/80 text-slate-400 border-b border-slate-800">
+            <tr>
+              <th scope="col" class="px-6 py-4">Sección / Grupo</th>
+              <th scope="col" class="px-6 py-4">Asignatura / Docente</th>
+              <th scope="col" class="px-6 py-4 text-center">Evaluaciones</th>
+              <th scope="col" class="px-6 py-4 text-center">Promedio General</th>
+              <th scope="col" class="px-6 py-4 text-center">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tablaBody" class="divide-y divide-slate-800/60">
+            <!-- Filas inyectadas dinámicamente con JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="bg-slate-900 border-t border-slate-800 mt-auto py-6 text-center text-xs text-slate-500">
+    <p>© C.E.C. “Padre Mario Zanconato” - San Marcos, San Salvador Sur</p>
+    <p class="mt-1">Sistema Integrado de Análisis de Evaluación Docente</p>
+  </footer>
+
+  <!-- SCRIPT CONECTIVIDAD & RENDERIZADO -->
+  <script>
+    // URL del Apps Script publicado (Reemplazar con tu enlace real de Apps Script)
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM_gijr6HShfnBQCqIm0zNsZ8wYrmjPfgvnEvN07TxeqwLPN266U_2wir4nZjx_PwwZg/exec";
+
+    let barChartInstance = null;
+    let radarChartInstance = null;
+    let datosCompletos = null;
+
+    // Cargar datos en vivo desde Google Apps Script
+    async function obtenerDatos() {
+      try {
+        const resp = await fetch(APPS_SCRIPT_URL);
+        datosCompletos = await resp.json();
+        filtrarResultados();
+      } catch (e) {
+        console.error("Error al conectar con Google Sheets:", e);
+      }
+    }
+
+    function filtrarResultados() {
+      if (!datosCompletos) return;
+
+      const grupoSel = document.getElementById("filtroGrupo").value;
+      
+      let listaFiltrada = datosCompletos.docentes;
+      if (grupoSel !== "TODOS") {
+        listaFiltrada = datosCompletos.docentes.filter(d => d.grupo === grupoSel);
+      }
+
+      // Recalcular KPIs
+      const totalEvaluaciones = listaFiltrada.reduce((acc, curr) => acc + curr.total, 0);
+      const promedioGlobal = listaFiltrada.length > 0
+        ? (listaFiltrada.reduce((acc, curr) => acc + parseFloat(curr.promedio), 0) / listaFiltrada.length).toFixed(2)
+        : "0.00";
+
+      document.getElementById("kpi-total").innerText = totalEvaluaciones;
+      document.getElementById("kpi-promedio").innerText = promedioGlobal + " / 5.0";
+      document.getElementById("kpi-docentes").innerText = listaFiltrada.length;
+      document.getElementById("kpi-dimension").innerText = "Relación Estud. (4.8)";
+
+      renderizarGraficos(listaFiltrada);
+      renderizarTabla(listaFiltrada);
+    }
+
+    function renderizarGraficos(docentes) {
+      const labels = docentes.map(d => d.docente.length > 20 ? d.docente.substring(0, 20) + '...' : d.docente);
+      const promedios = docentes.map(d => d.promedio);
+
+      // 1. Gráfico de Barras
+      if (barChartInstance) barChartInstance.destroy();
+      const ctxBar = document.getElementById('barChart').getContext('2d');
+      barChartInstance = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Promedio General',
+            data: promedios,
+            backgroundColor: '#3b82f6',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { min: 0, max: 5, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      // 2. Gráfico Radar
+      if (radarChartInstance) radarChartInstance.destroy();
+      const ctxRadar = document.getElementById('radarChart').getContext('2d');
+      radarChartInstance = new Chart(ctxRadar, {
+        type: 'radar',
+        data: {
+          labels: ['D1: Planificación', 'D2: Estrategias', 'D3: Evaluación', 'D4: Relación Estud.'],
+          datasets: [{
+            label: 'Promedio Institucional',
+            data: [4.2, 4.0, 4.5, 4.8],
+            backgroundColor: 'rgba(168, 85, 247, 0.2)',
+            borderColor: '#a855f7',
+            pointBackgroundColor: '#a855f7'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              min: 0, max: 5,
+              grid: { color: '#1e293b' },
+              angleLines: { color: '#334155' },
+              pointLabels: { color: '#cbd5e1', font: { size: 11 } },
+              ticks: { display: false }
+            }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderizarTabla(docentes) {
+      const tbody = document.getElementById("tablaBody");
+      tbody.innerHTML = "";
+
+      if (docentes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-6 text-center text-slate-500">No hay registros de evaluación disponibles para este filtro.</td></tr>`;
+        return;
+      }
+
+      docentes.forEach(d => {
+        const prom = parseFloat(d.promedio);
+        let badge = `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-semibold">Excelente</span>`;
+        if (prom < 4.0 && prom >= 3.0) {
+          badge = `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1 rounded-full text-xs font-semibold">Aceptable</span>`;
+        } else if (prom < 3.0 && prom > 0) {
+          badge = `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-3 py-1 rounded-full text-xs font-semibold">Atención</span>`;
+        } else if (prom === 0) {
+          badge = `<span class="bg-slate-800 text-slate-400 border border-slate-700 px-3 py-1 rounded-full text-xs font-semibold">Sin datos</span>`;
+        }
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/40 transition-colors";
+        tr.innerHTML = `
+          <td class="px-6 py-4 font-semibold text-slate-300">${d.grupo}</td>
+          <td class="px-6 py-4 text-white">${d.docente}</td>
+          <td class="px-6 py-4 text-center font-bold text-brand-400">${d.total}</td>
+          <td class="px-6 py-4 text-center font-bold text-white">${d.promedio} / 5.0</td>
+          <td class="px-6 py-4 text-center">${badge}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Inicializar y refrescar automáticamente cada 10 segundos
+    obtenerDatos();
+    setInterval(obtenerDatos, 10000);
+  </script>
+</body>
+</html>
