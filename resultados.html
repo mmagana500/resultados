@@ -207,21 +207,30 @@
 
   <!-- SCRIPT CONECTIVIDAD & RENDERIZADO -->
   <script>
-    // URL del Apps Script publicado (Reemplazar con tu enlace real de Apps Script)
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxr0gr63PHk9l_wVjh6_4eXVrg40edjZFV6hpRwxzDaMRsXXkYNH9FRY31ZbsYYR9k/exec";
 
     let barChartInstance = null;
     let radarChartInstance = null;
     let datosCompletos = null;
 
-    // Cargar datos en vivo desde Google Apps Script
     async function obtenerDatos() {
+      const tbody = document.getElementById("tablaBody");
+      
+      if (!datosCompletos) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400"><i class="fa-solid fa-spinner animate-spin text-brand-500 mr-2"></i> Cargando datos de evaluación...</td></tr>`;
+      }
+
       try {
         const resp = await fetch(APPS_SCRIPT_URL);
+        if (!resp.ok) throw new Error("Error en la respuesta de red");
+        
         datosCompletos = await resp.json();
         filtrarResultados();
       } catch (e) {
         console.error("Error al conectar con Google Sheets:", e);
+        if (!datosCompletos) {
+          tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-6 text-center text-rose-400"><i class="fa-solid fa-triangle-exclamation mr-2"></i> No se pudieron obtener los datos. Verifica la URL o permisos del script.</td></tr>`;
+        }
       }
     }
 
@@ -230,31 +239,54 @@
 
       const grupoSel = document.getElementById("filtroGrupo").value;
       
-      let listaFiltrada = datosCompletos.docentes;
+      let listaFiltrada = datosCompletos.docentes || [];
       if (grupoSel !== "TODOS") {
         listaFiltrada = datosCompletos.docentes.filter(d => d.grupo === grupoSel);
       }
 
-      // Recalcular KPIs
-      const totalEvaluaciones = listaFiltrada.reduce((acc, curr) => acc + curr.total, 0);
+      const totalEvaluaciones = listaFiltrada.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
       const promedioGlobal = listaFiltrada.length > 0
-        ? (listaFiltrada.reduce((acc, curr) => acc + parseFloat(curr.promedio), 0) / listaFiltrada.length).toFixed(2)
+        ? (listaFiltrada.reduce((acc, curr) => acc + parseFloat(curr.promedio || 0), 0) / listaFiltrada.length).toFixed(2)
         : "0.00";
+
+      const dimensiones = datosCompletos.dimensiones || {
+        planificacion: 0,
+        estrategias: 0,
+        evaluacion: 0,
+        relacion: 0
+      };
+
+      const mapaNombres = {
+        planificacion: "D1: Planificación",
+        estrategias: "D2: Estrategias",
+        evaluacion: "D3: Evaluación",
+        relacion: "D4: Relación Estud."
+      };
+
+      let maxKey = "planificacion";
+      let maxVal = -1;
+      for (const [key, val] of Object.entries(dimensiones)) {
+        if (val > maxVal) {
+          maxVal = val;
+          maxKey = key;
+        }
+      }
 
       document.getElementById("kpi-total").innerText = totalEvaluaciones;
       document.getElementById("kpi-promedio").innerText = promedioGlobal + " / 5.0";
       document.getElementById("kpi-docentes").innerText = listaFiltrada.length;
-      document.getElementById("kpi-dimension").innerText = "Relación Estud. (4.8)";
+      document.getElementById("kpi-dimension").innerText = maxVal > 0 
+        ? `${mapaNombres[maxKey]} (${Number(maxVal).toFixed(1)})`
+        : "Sin Datos";
 
-      renderizarGraficos(listaFiltrada);
+      renderizarGraficos(listaFiltrada, dimensiones);
       renderizarTabla(listaFiltrada);
     }
 
-    function renderizarGraficos(docentes) {
+    function renderizarGraficos(docentes, dimensiones) {
       const labels = docentes.map(d => d.docente.length > 20 ? d.docente.substring(0, 20) + '...' : d.docente);
       const promedios = docentes.map(d => d.promedio);
 
-      // 1. Gráfico de Barras
       if (barChartInstance) barChartInstance.destroy();
       const ctxBar = document.getElementById('barChart').getContext('2d');
       barChartInstance = new Chart(ctxBar, {
@@ -279,7 +311,6 @@
         }
       });
 
-      // 2. Gráfico Radar
       if (radarChartInstance) radarChartInstance.destroy();
       const ctxRadar = document.getElementById('radarChart').getContext('2d');
       radarChartInstance = new Chart(ctxRadar, {
@@ -288,7 +319,12 @@
           labels: ['D1: Planificación', 'D2: Estrategias', 'D3: Evaluación', 'D4: Relación Estud.'],
           datasets: [{
             label: 'Promedio Institucional',
-            data: [4.2, 4.0, 4.5, 4.8],
+            data: [
+              dimensiones.planificacion || 0,
+              dimensiones.estrategias || 0,
+              dimensiones.evaluacion || 0,
+              dimensiones.relacion || 0
+            ],
             backgroundColor: 'rgba(168, 85, 247, 0.2)',
             borderColor: '#a855f7',
             pointBackgroundColor: '#a855f7'
@@ -344,7 +380,6 @@
       });
     }
 
-    // Inicializar y refrescar automáticamente cada 10 segundos
     obtenerDatos();
     setInterval(obtenerDatos, 10000);
   </script>
